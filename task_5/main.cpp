@@ -51,26 +51,28 @@ int find_next_max_piece_index(int n, const double* const lengths, const int* con
 char* task(int n, int k, const double* const lengths) {
     double max_piece_length = find_max_piece(n, k, lengths);
     double piece_fixed_precision = std::trunc(max_piece_length * 100) / 100;
-    char* formatted_string = nullptr;
+    char* formatted_string = new char[256];
+    formatted_string[255] = '\0';
     std::sprintf(formatted_string, "%.2lf\n", piece_fixed_precision);
     return formatted_string;
 }
 
-/*
 int main() {
     int N = 0;
     int K = 0;
 
-    int* lengths = new int[N];
-
     std::cin >> N >> K;
+    
+    double* lengths = new double[N];
 
     for (int i = 0; i < N; i++) {
-        std::cin >> lengths;
+        std::cin >> lengths[i];
     }
 
-    std::cout << task(n, k, lengths)
+    char* task_output = task(N, K, lengths);
+    std::cout << task_output << '\n';
 
+
+    delete[] task_output;
     delete[] lengths;
 }
-*/
