@@ -1,10 +1,15 @@
 #include <iostream>
-#include <set>
+#include <vector>
 #include <algorithm>
 
 struct city_t {
   int id_;
   int population_;
+
+  city_t():
+    id_(0),
+    population_(0)
+  {}
 
   city_t(int id, int population):
     id_(id),
@@ -21,14 +26,16 @@ int main() {
   int q = 0;
 
   std::cin >> N;
-  std::set< city_t > cities = {};
+  std::vector< city_t > cities(70000);
 
   for (int i = 0; i < N; i++) {
     int population = 0;
     std::cin >> population;
 
-    cities.insert(city_t(i + 1, population));
+    cities[i] = city_t(i + 1, population);
   }
+
+  std::sort(cities.begin(), cities.end());
 
   std::cin >> q;
 
@@ -43,11 +50,11 @@ int main() {
     
     out[i] = '0';
 
-    city_t lower_f = city_t(l, x);
-    city_t upper_f = city_t(r, x);
+    city_t lower_city(l, x);
+    city_t upper_city(r, x);
 
-    std::set< city_t >::const_iterator lower = cities.lower_bound(lower_f);
-    std::set< city_t >::const_iterator upper = cities.upper_bound(upper_f);
+    std::vector< city_t >::const_iterator lower = std::lower_bound(cities.cbegin(), cities.cend(), lower_city);
+    std::vector< city_t >::const_iterator upper = std::upper_bound(cities.cbegin(), cities.cend(), upper_city);
 
     for (; lower != upper; lower++) {
       if ((*lower).population_ == x) {
