@@ -3,7 +3,7 @@
 #include <bitset>
 #include <vector>
 
-const int DIMENSIONS = 4;
+const int DIMENSIONS = 2000;
 using bitset = std::bitset< DIMENSIONS >;
 using bts_iterator = std::vector< bitset >::iterator;
 using bts_citerator = std::vector< bitset >::const_iterator;
@@ -25,30 +25,48 @@ bts_iterator get_hamming_nearest(std::vector< bitset >& vectors, const bitset& s
 }
 
 int main() {
-  std::vector< bitset > vectors {
-    bitset{"1100"},
-    bitset{"1000"},
-    bitset{"0100"},
-    bitset{"0001"},
-    bitset{"0111"}
-  };
+  int N = 0;
+  std::cin >> N;
 
-  bitset start_point{"0000"};
-  bitset end_point{"1111"};
+  std::vector< bitset > vectors(100);
 
-  int i = 0;
-  while (end_point != start_point) {
-    bts_iterator nearest_it = get_hamming_nearest(vectors, end_point);
-    end_point ^= *nearest_it;
+  int lbound = 0;
+  int ubound = 0;
 
-    std::cout << *nearest_it << '\n';
+  for (int i = 0; i < N - 1; i++) {
+    std::cin >> lbound >> ubound;
+
+    for (int j = lbound + 999; j < ubound + 999; j++) {
+      vectors[i][j] = true;
+    }
+  }
+
+  std::cin >> lbound >> ubound;
+  bitset start_point = {};
+  bitset end_point = {};
+  for (int j = lbound + 999; j < ubound + 999; j++) {
+    end_point[j] = true;
+  }
+
+  std::vector< bitset > optimized = {};
+
+  while ((end_point != start_point) && !vectors.empty()) {
     std::cout << end_point << '\n';
 
+    bts_iterator nearest_it = get_hamming_nearest(vectors, end_point);
+    end_point = ~((~end_point) | (*nearest_it));
+
+    optimized.push_back(*nearest_it);
     vectors.erase(nearest_it, nearest_it);
 
-    if (i > 10) {
-      break;
-    }
-    i++;
   }  
+
+  for (bitset bts: optimized) {
+    for (int i = bts.size()-1; i > -1; --i) {
+      if (bts.test(i)) {
+        std::cout << i << '\n';
+      }
+    }
+    std::cout << '\n';
+  }
 }
