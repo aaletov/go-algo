@@ -1,72 +1,128 @@
 #include <iostream>
 #include <algorithm>
-#include <bitset>
 #include <vector>
 
-const int DIMENSIONS = 2000;
-using bitset = std::bitset< DIMENSIONS >;
-using bts_iterator = std::vector< bitset >::iterator;
-using bts_citerator = std::vector< bitset >::const_iterator;
+using viterator = std::vector< closed_interval_t >::iterator;
 
-int get_hamming_distance(const bitset& lhs, const bitset& rhs) {
-  return (lhs ^ rhs).count();
+struct closed_interval_t {
+  int begin_;
+  int end_;
+  closed_interval_t(int begin, int end):
+    begin_(begin),
+    end_(end)
+  {}
+};
+
+struct coverage_interval_t {
+  closed_interval_t interval_;
+  std::vector< closed_interval_t > coverage_;
+  bool is_covered_;
+  coverage_interval_t(closed_interval_t interval):
+    interval_(interval),
+    coverage_(),
+    is_covered_(false)
+  {}
+};
+
+bool is_point_in_interval(const closed_interval_t& interval, int point) {
+  return (point >= interval.begin_) && (point <= interval.end_);
 }
 
-bts_iterator get_hamming_nearest(std::vector< bitset >& vectors, const bitset& source) {
-  bts_iterator nearest_it = vectors.begin();
+bool is_intersected(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+  return is_point_in_interval(lhs, rhs.begin_) || is_point_in_interval(rhs, lhs.begin_);
+}
 
-  for (bts_iterator it = vectors.begin(); it != vectors.end(); it++) {
-    if (get_hamming_distance(*it, source) < get_hamming_distance(*nearest_it, source)) {
-      nearest_it = it;
-    }
+closed_interval_t merge(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+  assert(is_intersected(lhs, rhs));
+
+  int min_begin = (lhs.begin_ <= rhs.begin_) ? lhs.begin_ : rhs.begin_;
+  int max_end = (lhs.end_ >= rhs.end_) ? lhs.end_ : rhs.end_;
+
+  assert(max_end > min_begin);
+
+  return closed_interval_t(min_begin, max_end);
+}
+
+int get_intersect_factor(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+  assert(is_intersected(lhs, rhs));
+
+  int max_begin = (lhs.begin_ >= rhs.begin_) ? lhs.begin_ : rhs.begin_;
+  int min_end = (lhs.end_ <= rhs.end_) ? lhs.end_ : rhs.end_;
+
+  int intersect_factor = 0;
+
+  if (max_begin <= min_end) {
+    intersect_factor = max_end - max_begin + 1;
   }
 
-  return nearest_it;
+  return intersect_factor;
+}
+
+bool is_intersected(const coverage_interval_t& coverage, const closed_interval_t& interval) {
+  return is_intersected(coverage.interval_, interval);
+}
+
+void merge(coverage_interval_t& coverage, const closed_interval_t& interval) {
+  coverage.interval_ = merge(coverage.interval_, interval);
+}
+
+
+
+void exclude(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+
 }
 
 int main() {
   int N = 0;
   std::cin >> N;
 
-  std::vector< bitset > vectors(100);
+  std::vector< closed_interval_t > intervals = {};
+  std::vector< coverage_interval_t > coverage_intervals = {};
 
-  int lbound = 0;
-  int ubound = 0;
+  int lpoint = 0;
+  int rpoint = 0;
 
-  for (int i = 0; i < N - 1; i++) {
-    std::cin >> lbound >> ubound;
+  for (int i = 0; i < N; i++) {
+    std::cin >> lpoint >> rpoint;
+    closed_interval_t interval(lpoint, rpoint);
 
-    for (int j = lbound + 999; j < ubound + 999; j++) {
-      vectors[i][j] = true;
-    }
-  }
+    bool do_push_back = true;
 
-  std::cin >> lbound >> ubound;
-  bitset start_point = {};
-  bitset end_point = {};
-  for (int j = lbound + 999; j < ubound + 999; j++) {
-    end_point[j] = true;
-  }
-
-  std::vector< bitset > optimized = {};
-
-  while ((end_point != start_point) && !vectors.empty()) {
-    std::cout << end_point << '\n';
-
-    bts_iterator nearest_it = get_hamming_nearest(vectors, end_point);
-    end_point = ~((~end_point) | (*nearest_it));
-
-    optimized.push_back(*nearest_it);
-    vectors.erase(nearest_it, nearest_it);
-
-  }  
-
-  for (bitset bts: optimized) {
-    for (int i = bts.size()-1; i > -1; --i) {
-      if (bts.test(i)) {
-        std::cout << i << '\n';
+    for(int j = 0; j < coverage_intervals.size(); j++) {
+      if (is_intersected(interval, coverage_intervals[j].interval_)) {
+        coverage_intervals[j] = coverage_interval_t(merge(interval, merged_intervals[j].interval_));
+        do_push_back = false;
       }
     }
-    std::cout << '\n';
+
+    if (do_push_back) {
+      merged_intervals.push_back(interval);
+    }
+
+    intervals.push_back(interval);
   }
+
+  for (const closed_interval_t& interval: intervals) {
+    int max_intersect_factor = 0;
+    int current_intersect_factor = 0;
+    const closed_interval_t& max_intersect_interval = intervals[0]; 
+
+    for (viterator it = merged_intervals.begin(); it != merged_intervals.end(); it++) {
+      if (is_intersected(interval, *it)) {
+        current_intersect_factor = get_intersect_factor(interval, *it);
+        if (current_intersect_factor > max_intersect_factor) {
+          max_intersect_factor = current_intersect_factor;
+          max_intersect_interval = interval;
+        }
+      }
+    }
+
+    if (interval == (*it)) {
+      merged_intervals.erase(it);
+    } else {
+      exclude((*it), interval);
+    }
+  }
+
+
 }
