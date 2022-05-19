@@ -2,127 +2,104 @@
 #include <algorithm>
 #include <vector>
 
-using viterator = std::vector< closed_interval_t >::iterator;
+const int SIZE = 1999;
+const int SHIFT = 999;
 
 struct closed_interval_t {
   int begin_;
   int end_;
   closed_interval_t(int begin, int end):
-    begin_(begin),
-    end_(end)
+    begin_(begin + SHIFT),
+    end_(end + SHIFT)
   {}
+  int get_unshifted_begin() {
+    return begin_ - SHIFT;
+  }
+  int get_unshifted_end() {
+    return end_ - SHIFT;
+  }
 };
 
-struct coverage_interval_t {
-  closed_interval_t interval_;
-  std::vector< closed_interval_t > coverage_;
-  bool is_covered_;
-  coverage_interval_t(closed_interval_t interval):
-    interval_(interval),
-    coverage_(),
-    is_covered_(false)
-  {}
-};
-
-bool is_point_in_interval(const closed_interval_t& interval, int point) {
-  return (point >= interval.begin_) && (point <= interval.end_);
+bool does_have_inner_points(const std::vector< bool >& coverage, const closed_interval_t& interval) {
+  for (int i = interval.begin_ + 1; i < interval.end_; i++) {
+    if (coverage[i] == true) {
+      return true;
+    }
+  }
+  return false;
 }
 
-bool is_intersected(const closed_interval_t& lhs, const closed_interval_t& rhs) {
-  return is_point_in_interval(lhs, rhs.begin_) || is_point_in_interval(rhs, lhs.begin_);
+void add(std::vector< bool >& coverage, const closed_interval_t& interval) {
+  for (int i = interval.begin_; i < interval.end_ + 1; i++) {
+    coverage[i] = true;
+  }
 }
 
-closed_interval_t merge(const closed_interval_t& lhs, const closed_interval_t& rhs) {
-  assert(is_intersected(lhs, rhs));
-
-  int min_begin = (lhs.begin_ <= rhs.begin_) ? lhs.begin_ : rhs.begin_;
-  int max_end = (lhs.end_ >= rhs.end_) ? lhs.end_ : rhs.end_;
-
-  assert(max_end > min_begin);
-
-  return closed_interval_t(min_begin, max_end);
+bool length_comparator(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+  return (lhs.end_ - lhs.begin_) < (rhs.end_ - rhs.begin_);
 }
 
-int get_intersect_factor(const closed_interval_t& lhs, const closed_interval_t& rhs) {
-  assert(is_intersected(lhs, rhs));
+bool coordinate_comparator(const closed_interval_t& lhs, const closed_interval_t& rhs) {
+  return lhs.begin_ < rhs.begin_;
+}
 
-  int max_begin = (lhs.begin_ >= rhs.begin_) ? lhs.begin_ : rhs.begin_;
-  int min_end = (lhs.end_ <= rhs.end_) ? lhs.end_ : rhs.end_;
+std::vector< closed_interval_t > to_intervals(const std::vector< bool >& coverage) {
+  std::vector< closed_interval_t > intervals = {};
 
-  int intersect_factor = 0;
+  int begin = 0;
+  int end = 0;
 
-  if (max_begin <= min_end) {
-    intersect_factor = max_end - max_begin + 1;
+  for (int i = 0; i < coverage.size(); i++) {
+    if ((begin == 0) && (coverage[i] == 1)) {
+      begin = i - SHIFT;
+    }
+    if ((begin != 0) && (coverage[i] == 0)) {
+      end = i - 1 - SHIFT;
+      intervals.push_back(closed_interval_t(begin, end));
+      begin = 0;
+      end = 0;
+    }
   }
 
-  return intersect_factor;
-}
-
-bool is_intersected(const coverage_interval_t& coverage, const closed_interval_t& interval) {
-  return is_intersected(coverage.interval_, interval);
-}
-
-void merge(coverage_interval_t& coverage, const closed_interval_t& interval) {
-  coverage.interval_ = merge(coverage.interval_, interval);
-}
-
-
-
-void exclude(const closed_interval_t& lhs, const closed_interval_t& rhs) {
-
+  return intervals;
 }
 
 int main() {
   int N = 0;
   std::cin >> N;
 
+  std::vector< bool > coverage(SIZE);
+
+  for (int i = 0; i < SIZE; i++) {
+    coverage[i] = false;
+  }
+
   std::vector< closed_interval_t > intervals = {};
-  std::vector< coverage_interval_t > coverage_intervals = {};
 
   int lpoint = 0;
   int rpoint = 0;
 
   for (int i = 0; i < N; i++) {
     std::cin >> lpoint >> rpoint;
-    closed_interval_t interval(lpoint, rpoint);
-
-    bool do_push_back = true;
-
-    for(int j = 0; j < coverage_intervals.size(); j++) {
-      if (is_intersected(interval, coverage_intervals[j].interval_)) {
-        coverage_intervals[j] = coverage_interval_t(merge(interval, merged_intervals[j].interval_));
-        do_push_back = false;
-      }
-    }
-
-    if (do_push_back) {
-      merged_intervals.push_back(interval);
-    }
-
-    intervals.push_back(interval);
+    intervals.push_back(closed_interval_t(lpoint, rpoint));
   }
 
-  for (const closed_interval_t& interval: intervals) {
-    int max_intersect_factor = 0;
-    int current_intersect_factor = 0;
-    const closed_interval_t& max_intersect_interval = intervals[0]; 
+  std::sort(intervals.begin(), intervals.end(), length_comparator);
+  std::vector< closed_interval_t > filtered_intervals = {};
 
-    for (viterator it = merged_intervals.begin(); it != merged_intervals.end(); it++) {
-      if (is_intersected(interval, *it)) {
-        current_intersect_factor = get_intersect_factor(interval, *it);
-        if (current_intersect_factor > max_intersect_factor) {
-          max_intersect_factor = current_intersect_factor;
-          max_intersect_interval = interval;
-        }
-      }
-    }
-
-    if (interval == (*it)) {
-      merged_intervals.erase(it);
-    } else {
-      exclude((*it), interval);
+  for (int i = 0; i < N; i++) {
+    if (!does_have_inner_points(coverage, intervals[i])) {
+      add(coverage, intervals[i]);
+      filtered_intervals.push_back(intervals[i]);
     }
   }
 
+  std::sort(filtered_intervals.begin(), filtered_intervals.end(), coordinate_comparator);
+
+  std::cout << filtered_intervals.size() << '\n';
+  for (int i = 0; i < filtered_intervals.size(); i++) {
+    std::cout << filtered_intervals[i].get_unshifted_begin() << ' ' << filtered_intervals[i].get_unshifted_end() 
+              << '\n';
+  }  
 
 }
