@@ -42,8 +42,8 @@ bool is_intersected(const closed_interval_t& lhs, const closed_interval_t& rhs) 
 }
 
 bool does_have_inner_points(const std::vector< char >& coverage, const closed_interval_t& interval) {
-  if (is_two_pointed(interval) && !(((coverage[interval.begin_] == END) && (coverage[interval.end_] == BEGIN))
-    || ((coverage[interval.begin_] == FALSE) && (coverage[interval.end_] == FALSE)))) {
+  if (is_two_pointed(interval) && ((coverage[interval.begin_] == BEGIN) || (coverage[interval.end_] == END) 
+    || ((coverage[interval.begin_] == TRUE) || (coverage[interval.end_] == TRUE)))) {
     return true;
   }
   // covers all cases with inner points but two-pointed intervals doesn't have inner points
@@ -56,6 +56,13 @@ bool does_have_inner_points(const std::vector< char >& coverage, const closed_in
 }
 
 void add(std::vector< char >& coverage, const closed_interval_t& interval) {
+  if ((coverage[interval.begin_] == END) && (coverage[interval.end_] == BEGIN)) {
+    for (int i = interval.begin_; i < interval.end_ + 1; i++) {
+      coverage[i] = TRUE;
+    }
+    return;
+  }
+
   coverage[interval.begin_] = BEGIN;
   coverage[interval.end_] = END;
 
