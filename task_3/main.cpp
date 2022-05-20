@@ -42,7 +42,7 @@ bool is_intersected(const closed_interval_t& lhs, const closed_interval_t& rhs) 
 }
 
 bool does_have_inner_points(const std::vector< char >& coverage, const closed_interval_t& interval) {
-  if (is_two_pointed(interval) && !(((coverage[interval.begin_] == END) && (coverage[interval.end_ == BEGIN]))
+  if (is_two_pointed(interval) && !(((coverage[interval.begin_] == END) && (coverage[interval.end_] == BEGIN))
     || ((coverage[interval.begin_] == FALSE) && (coverage[interval.end_] == FALSE)))) {
     return true;
   }
