@@ -35,6 +35,13 @@ func main() {
 		fmt.Errorf("%v", err.Error())
 	}
 
+	if n == 1 {
+		var c1 float32
+		fmt.Scanf("%g\n", &c1)
+		fmt.Printf("%g\n", (a0 + an1) / 2 - c1)
+		return
+	}
+
 	var a []float32 = make([]float32, n + 2)
 
 	a[0] = a0
@@ -62,23 +69,14 @@ func main() {
 	alpha[n + 1] = 0
 	beta[n + 1] = (((2 * c[n] + a[n + 1]) - A * beta[n]) / (A * alpha[n] + B))
 
-	fmt.Printf("---\n")
-	fmt.Printf("%g\n", alpha[2])
-	fmt.Printf("%g\n", alpha[3])
-	fmt.Printf("%g\n", beta[2])
-	fmt.Printf("%g\n", beta[3])
+	for i := 2; i < n + 1; i++ {
+    alpha[i + 1] = -C / (A * alpha[i] + B)
+    beta[i + 1] = (2 * c[i] - A * beta[i]) / (A * alpha[i] + B)
+  }
 
 	for i := n; i > 0; i-- {
 		a[i] = alpha[i + 1] * a[i + 1] + beta[i + 1]
 	}
 
-	fmt.Printf("%d\n", n)
-
-	for i := 0; i < n + 2; i++ {
-		fmt.Printf("%g\n", a[i])
-	}
-
-	for i := 1; i < n + 1; i++ {
-		fmt.Printf("%g\n", c[i])
-	}
+	fmt.Printf("%g\n", a[1])
 }
