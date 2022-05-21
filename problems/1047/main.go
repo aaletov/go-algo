@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 const (
 	A float64 = -1
@@ -15,10 +18,54 @@ type row struct {
 	Beta float64
 }
 
+func solveOneRowProblem(n int, a0 float64, an1 float64) (err error) {
+	var c1 float64
+	_, err = fmt.Scanf("%g\n", &c1)
+
+	if err != nil {
+		return
+	}
+
+	_, err = fmt.Printf("%g\n", (a0 + an1) / 2 - c1)
+
+	return
+}
+
 func readInitials() (n int, a0 float64, an1 float64, err error) {
 	_, err = fmt.Scanf("%d\n%g\n%g\n", &n, &a0, &an1)
 
 	return
+}
+
+func readConstants(n int, a0 float64, an1 float64, rows []row) (err error) {
+	var c1 float64
+	_, err = fmt.Scanf("%g\n", &c1)
+
+	if err != nil {
+		return
+	}
+
+	for i := 2; i < n; i++ {
+		_, err = fmt.Scanf("%g\n", &rows[i].F)
+
+		if err != nil {
+			return
+		}
+
+		rows[i].F *= -2
+	}
+
+	var cn float64
+	_, err = fmt.Scanf("%g\n", &cn)
+
+	if err != nil {
+		return
+	}
+
+	rows[1].F = -2 * c1 + a0
+	rows[n].F = -2 * cn + an1
+
+	return 
 }
 
 func forwardStep(current *row, next *row, A float64, B float64, C float64) {
@@ -64,35 +111,28 @@ func main() {
 
 	if err != nil {
 		fmt.Errorf("%v", err.Error())
+		os.Exit(1)
 	}
 
 	if n == 1 {
-		var c1 float64
-		fmt.Scanf("%g\n", &c1)
-		fmt.Printf("%g\n", (a0 + an1) / 2 - c1)
-		return
+		err = solveOneRowProblem(n, a0, an1)
+
+		if err != nil {
+			fmt.Errorf("%v", err.Error())
+			os.Exit(1)
+		}
+
+		os.Exit(0)
 	}
 
 	var rows []row = make([]row, n + 2)
-	rows[0].A = a0
-	rows[n + 1].A = an1
 
-	var c1 float64
-	_, err = fmt.Scanf("%g\n", &c1)
+	err = readConstants(n, a0, an1, rows)
 
-	for i := 2; i < n; i++ {
-		_, err = fmt.Scanf("%g\n", &rows[i].F)
-		rows[i].F *= -2
-		if err != nil {
-			fmt.Errorf("%v", err.Error())
-		}
+	if err != nil {
+		fmt.Errorf("%v", err.Error())
+		os.Exit(1)
 	}
-
-	var cn float64
-	fmt.Scanf("%g\n", &cn)
-
-	rows[1].F = -2 * c1 + rows[0].A
-	rows[n].F = -2 * cn + rows[n + 1].A
 
 	forwardSweep(n, rows)
 	backwardSweep(n, rows)
