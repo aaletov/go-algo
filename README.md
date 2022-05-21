@@ -1,5 +1,7 @@
 # About
-My solutions for problems on [Timus Online Judge](https://acm.timus.ru) loaded by nickname *aaletov*
+My solutions for problems on [Timus Online Judge](https://acm.timus.ru)
+
+My profile on Timus - [Artemy](https://acm.timus.ru/author.aspx?id=338024) 
 
 ## Problems
 Following problems have been solved
