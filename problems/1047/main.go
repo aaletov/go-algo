@@ -56,14 +56,14 @@ func main() {
 	var C float64 = -1
 
 	alpha[2] = -C / B;
-	beta[2] = ((2 * c[1] + a[0]) / B)
+	beta[2] = ((-2 * c[1] + a[0]) / B)
 
 	alpha[n + 1] = 0
-	beta[n + 1] = (((2 * c[n] + a[n + 1]) - A * beta[n]) / (A * alpha[n] + B))
+	beta[n + 1] = (((-2 * c[n] + a[n + 1]) - A * beta[n]) / (A * alpha[n] + B))
 
 	for i := 2; i < n + 1; i++ {
     alpha[i + 1] = -C / (A * alpha[i] + B)
-    beta[i + 1] = (2 * c[i] - A * beta[i]) / (A * alpha[i] + B)
+    beta[i + 1] = (-2 * c[i] - A * beta[i]) / (A * alpha[i] + B)
   }
 
 	for i := n; i > 0; i-- {
