@@ -10,4 +10,5 @@ Following problems have been solved
 - 1613 - [Для любителей статистики](https://acm.timus.ru/problem.aspx?space=1&num=1613)
 - 1112 - [Покрытие](https://acm.timus.ru/problem.aspx?space=1&num=1112)
 - 1184 - [Cable Master](https://acm.timus.ru/problem.aspx?space=1&num=1184)
+- 1047 - [Простые вычисления](https://acm.timus.ru/problem.aspx?space=1&num=1047)
 
