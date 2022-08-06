@@ -10,13 +10,8 @@ type List[T comparable] struct {
 }
 
 func NewList[T comparable](value T) List[T] {
-	node := &Node[T] {
-		Value: value,
-	}
-	return List[T] {
-		Begin: node,
-		End: node,
-	}
+	node := NewNode(value)
+	return List[T] {node, node}
 }
 
 func (l List[T]) Empty() bool {
