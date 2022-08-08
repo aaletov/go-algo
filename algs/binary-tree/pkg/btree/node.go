@@ -40,26 +40,24 @@ func (root *Node[T]) Add(value T) error {
 	return nil
 }
 
-func (root *Node[t]) Find(value T) *Node[T] {
+func (root *Node[T]) Find(value T) *Node[T] {
 	if root == nil {
 		panic("Root cannot be nil")
 	}
 
 	if value < root.Value {
 		if root.Left != nil {
-			return find(root.Left)
-		} else {
-			return nil
+			return root.Left.Find(value)
 		}
 	} else if value > root.Value {
 		if root.Right != nil {
-			return find(root.Right)
-		} else {
-			return nil
+			return root.Right.Find(value)
 		}
 	} else if value == root.Value {
 		return root
 	}
+
+	return nil
 }
 
 func (root *Node[T]) PreOrderTraversal(f func(T)) {
