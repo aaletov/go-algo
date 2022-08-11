@@ -4,6 +4,10 @@ import (
 	"testing"
 )
 
+func getTreeSlice() []int32 {
+	return []int32{9, 11, 7, 8, 13, 6}
+}
+
 func getRawTree() *Node[int32] {
 	node := NewNode[int32](9)
 	node.Add(11)
